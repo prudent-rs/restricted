@@ -39,17 +39,22 @@ Macros generate code that blends, or is injected, into the invocator's source co
 - declaration of (local) `let` and `let mut` variables
 - definition of `static` and `const` items
   - and both of the above create local macros to access those variables or `const` or `static` items
-- local re-export of private items (from a submodule)
-  - and local macros to access those re-exports
+- local re-export of private items (from a submodule) and
+  - macros to access those re-exports by specifying the item's "short name", and
+  - "direct" local macros to access those re-exports (one macro per item).
 
 ## Simple syntax only
 
 There are two reason why `restricted` crate supports simple syntax only:
 
-- Supporting full grammar of `fn` or `struct/enum/union` definitions, or `impl` definitions, would
-  be complicated and difficult ro write, even read.
+- Supporting full grammar of `fn`, `type`, or `struct/enum/union` or `impl` definitions (with
+  generics and bounds), would be complicated and difficult to write. Difficult even to read or to
+  search in.
+  
+  And, migrating existing code to it would involve extra work.
 - Let's say that we would cover the full grammar of `fn`, `type`, `struct/enum/union` and `impl`
-  definitions. If a macro returns their names/path, they *can* be used in Rust code. For example:
+  definitions. If a macro returns their names/path, such a macro *can* be used in Rust code instead
+  of the name (for many purposes - not for all). For example:
   ```rust
     macro_rules! def_struct_s {
         () => {
@@ -82,7 +87,7 @@ There are two reason why `restricted` crate supports simple syntax only:
     type SS = StructS!(.);
     const _: StructS!(.) = SS {};
   ```
-  However, there is no way to handle this for `trait` items. For those we need to re-export them.
+  However, there is no way to apply the same to `trait` items. For those we have to re-export them.
   And since we're doing so, we can use the re-export method for `fn`, `type`, `struct/enum/union`
   and `impl` items, too.
 

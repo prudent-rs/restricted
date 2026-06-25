@@ -8,12 +8,14 @@ use no_link as _;
 #[cfg(rust_analyzer)]
 mod ra_macros;
 
+#[cfg(rust_analyzer)]
+use ra_macros as macro_source;
 #[cfg(not(rust_analyzer))]
-pub use restricted_enforce::at_direct;
-#[cfg(not(rust_analyzer))]
-pub use restricted_enforce::{at_const, at_static};
-#[cfg(not(rust_analyzer))]
-pub use restricted_enforce::{def_const, def_const_direct, def_static, def_static_direct};
+use restricted_enforce as macro_source;
+
+pub use macro_source::at_direct;
+pub use macro_source::{at_const, at_static};
+pub use macro_source::{def_const, def_const_direct, def_static, def_static_direct};
 
 pub mod prelude {
     pub use crate::{at_const, at_static};
