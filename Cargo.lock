@@ -57,6 +57,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
+name = "no-link"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c92d7c363e17e33cb78e212db459290e423d41c1a89423576bf75706f3d034bd"
+
+[[package]]
 name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -150,6 +156,7 @@ dependencies = [
 name = "restricted"
 version = "0.0.1"
 dependencies = [
+ "no-link",
  "restricted-enforce",
 ]
 

@@ -30,3 +30,5 @@ unknown_lints = { level = "forbid"}
 #
 restricted-enforce = { version = "0.0.1", path = "../restricted-enforce"}
 #restricted-enforce = "0.0.1"
+
+no-link = "0.2.0"
