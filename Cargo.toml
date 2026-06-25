@@ -1,0 +1,32 @@
+[package]
+name = "restricted"
+version = "0.0.1"
+edition = "2024"
+
+# Requiring Rust 1.88 for https://doc.rust-lang.org/proc_macro/struct.Span.html#method.local_file used by restricted-enforce.
+rust-version = "1.88.0"
+
+license = "BSD-2-Clause OR Apache-2.0 OR MIT"
+
+authors = ["Peter Lyons Kehl<peter.kehl@gmail.com>"]
+description = "Prevent consumers of your Rust macros from accidents. Enable your crates to export private-like types, traits and functions that are to be used only by its own macro_rules."
+
+categories = ["development-tools", "no-std", "no-std::no-alloc", "rust-patterns", "security"]
+
+keywords = ["isolation", "macro", "macro_rules", "macros"]
+
+repository = "https://github.com/prudent-rs/restricted"
+homepage = "https://github.com/prudent-rs/restricted"
+
+# "lints" key is supported only since Rust 1.74.0 (November 2023). But we include this even though
+# our rust-version/MSRV is 1.71.0.
+[lints.rust]
+unexpected_cfgs = { level = "forbid", check-cfg = ['cfg(rust_analyzer)'] }
+unknown_lints = { level = "forbid"}
+
+[dependencies]
+
+# for local development:
+#
+restricted-enforce = { version = "0.0.1", path = "../restricted-enforce"}
+#restricted-enforce = "0.0.1"
