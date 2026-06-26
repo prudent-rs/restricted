@@ -10,14 +10,14 @@ use ra_macros as macro_source;
 #[cfg(not(rust_analyzer))]
 use restricted_enforce as macro_source;
 
-pub use macro_source::{at_const, at_static};
-pub use macro_source::{def_const, def_const_direct, def_static, def_static_direct};
-
 pub mod prelude {
-    pub use crate::{at_const, at_static};
-    pub use crate::{def_const, def_const_direct, def_static, def_static_direct};
-    //pub use crate::{def_let, def_let_direct, def_mut, def_mut_direct, def_const, def_const_direct, def_static, def_static_direct, at_let, at_mut, at_const, at_static};
+    pub use crate::macro_source::{at_const, at_let, at_mut, at_static};
+    pub use crate::macro_source::{
+        def_const, def_const_direct, def_let, def_let_direct, def_mut, def_mut_direct, def_static,
+        def_static_direct,
+    };
 }
+pub use prelude::*;
 
 /// We can't report the actual version(s), because [panic] macro is not eager, and passing in
 /// (formatting) variables doesn't work in `const` context. See also
