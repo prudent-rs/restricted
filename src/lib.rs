@@ -11,10 +11,10 @@ use ra_macros as macro_source;
 use restricted_enforce as macro_source;
 
 pub mod prelude {
-    pub use crate::macro_source::{at_const, at_let, at_mut, at_static};
+    pub use crate::macro_source::{at_const, at_let, at_mut, at_static, at_use};
     pub use crate::macro_source::{
         def_const, def_const_direct, def_let, def_let_direct, def_mut, def_mut_direct, def_static,
-        def_static_direct,
+        def_static_direct, def_use, def_use_direct,
     };
 }
 pub use prelude::*;
