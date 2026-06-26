@@ -94,6 +94,30 @@ fn f() {
         }
         def_and_use_let!();
     }
+    {
+        macro_rules! def_use_and_consume {
+            () => {
+
+                fn _use_st() {
+                    
+                def_use! {
+                    St, CamelCase,
+                    pub struct St {}
+                    impl St {
+                        fn new() -> Self {
+                            Self {}
+                        }
+                    }
+                }
+                
+                //fn _use_st() {
+                    let st: at_use!(St, CamelCase);
+                    st = < at_use!(St, CamelCase) >::new();
+                }
+            };
+        }
+        def_use_and_consume!();
+    }
     /* */
     //bufo_bufo_private_ident_here_dimvxevsdmqmbnuhyptltyqdlnafhdbg= 0;
 }
