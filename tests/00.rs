@@ -94,23 +94,24 @@ fn f() {
         }
         def_and_use_let!();
     }
+    // ------
     {
         macro_rules! def_use_and_consume {
             () => {
 
                 fn _use_st() {
 
-                def_use_direct! {
-                    St, CamelCase,
-                    pub struct St {}
-                    impl St {
-                        pub fn new() -> Self {
-                            Self {}
+                    def_use_direct! {
+                        St, CamelCase,
+                        pub struct St {}
+                        impl St {
+                            pub fn new() -> Self {
+                                Self {}
+                            }
                         }
                     }
-                }
 
-                //fn _use_st() {
+                    //fn _use_st() {
                     {
                         let st: at_use!(St, CamelCase);
                         st = < at_use!(St, CamelCase) >::new();
@@ -119,6 +120,15 @@ fn f() {
                         let st: St!(.);
                         st = < St!(.) >::new();
                     }
+                    // _NOT_ inside a function - `super` keyword doesn't work there!
+                    //
+                    /*use_with!{
+                        St, CamelCase, st_access,
+                        pub type StAlias = St;
+                        pub type StAlias2 = St;
+                    }
+                    let _: StAlias = StAlias::new();
+                    let _: StAlias2 = StAlias2::new();*/
                 }
             };
         }
@@ -128,4 +138,24 @@ fn f() {
     //bufo_bufo_private_ident_here_dimvxevsdmqmbnuhyptltyqdlnafhdbg= 0;
 }
 
-use f as ff;
+def_use_direct! {
+    St, CamelCase,
+    pub struct St {}
+    impl St {
+        pub fn new() -> Self {
+            Self {}
+        }
+    }
+}
+
+use_with! {
+    St, CamelCase,
+    // any identifier unique in the scope where use_with! is invoked
+    st_access,
+
+    pub type StAlias = St;
+    pub type StAlias2 = St;
+}
+
+fn take_st_alias(_: StAlias) {}
+fn take_st_alias2(_: StAlias2) {}
