@@ -77,3 +77,5 @@ fn f() {
     /* */
     //bufo_bufo_private_ident_here_dimvxevsdmqmbnuhyptltyqdlnafhdbg= 0;
 }
+
+use f as ff;
