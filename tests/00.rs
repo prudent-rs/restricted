@@ -99,20 +99,26 @@ fn f() {
             () => {
 
                 fn _use_st() {
-                    
-                def_use! {
+
+                def_use_direct! {
                     St, CamelCase,
                     pub struct St {}
                     impl St {
-                        fn new() -> Self {
+                        pub fn new() -> Self {
                             Self {}
                         }
                     }
                 }
-                
+
                 //fn _use_st() {
-                    let st: at_use!(St, CamelCase);
-                    st = < at_use!(St, CamelCase) >::new();
+                    {
+                        let st: at_use!(St, CamelCase);
+                        st = < at_use!(St, CamelCase) >::new();
+                    }
+                    {
+                        let st: St!(.);
+                        st = < St!(.) >::new();
+                    }
                 }
             };
         }
