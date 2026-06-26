@@ -1,13 +1,26 @@
 # restricted
 
-`restricted` crate prevent consumers of your Rust macros from accidental, or intentional
-(well-intended or not) unsafe or bypassing/corrupting access to your macro's internals. Enable your
-crates to export private-like types, traits and functions that are to be used only by its own
-`macro_rules` (from the same crate).
+## Summary
+
+[`restricted`] crate ([`prudent-rs/restricted`](https://github.com/prudent-rs/restricted)) prevents
+**consumers** of your Rust macros from
+
+- accidental, or
+- intentional (well-intended or malicious)
+
+inconsistent, unguarded, corrupt or `unsafe` access to your macro's internals. It enables **your
+crates** to have private-like variables, functions and types, shared by **multiple** macros.
+
+That is _unlike_ standard items and variables defined by macros, which, if hygienic, are visible
+only to the macro that defined them, _but_ not to any successive invocations of macros
+from the same crate.
+
+[`restricted`] makes these variables, functions and types visible also to your **other** macros,
+invoked **after** the invocation that generates them.
 
 ## What (tl;dr)
 
-`restricted` crate provides macros that allow you, a macro author, to prevent consumers of your
+[`restricted`] crate provides macros that allow you, a macro author, to prevent consumers of your
 macros from accessing to your [declaration
 statements](https://doc.rust-lang.org/reference/statements.html#declaration-statements) (that is:
 [items](https://doc.rust-lang.org/reference/statements.html) and variables, even if declared with
@@ -28,13 +41,13 @@ Macros generate code that blends, or is injected, into the invocator's source co
 
 ## How?
 
-`restricted` generates
+[`restricted`] generates
 
 - random-based names for your macro's items and variables, and
 - accessor macros that can be invoked only from your macro(s) and not by the consumer code (by
   validating the [`Span`]).
 
-`restricted` provides macros for
+[`restricted`] provides macros for
 
 - declaration of (local) `let` and `let mut` variables
 - definition of `static` and `const` items
@@ -45,7 +58,7 @@ Macros generate code that blends, or is injected, into the invocator's source co
 
 ## Simple syntax only
 
-There are two reason why `restricted` crate supports simple syntax only:
+There are two reason why [`restricted`] crate supports simple syntax only:
 
 - Supporting full grammar of `fn`, `type`, or `struct/enum/union` or `impl` definitions (with
   generics and bounds), would be complicated and difficult to write. Difficult even to read or to
@@ -84,8 +97,8 @@ There are two reason why `restricted` crate supports simple syntax only:
         todo!()
     }
 
-    type SS = StructS!(.);
-    const _: StructS!(.) = SS {};
+    type StructAlias = StructS!(.);
+    const _: StructS!(.) = StructAlias {};
   ```
   However, there is no way to apply the same to `trait` items. For those we have to re-export them.
   And since we're doing so, we can use the re-export method for `fn`, `type`, `struct/enum/union`
@@ -128,7 +141,7 @@ Source file paths have be in UTF-8.
 ### Normally non-ASCII Unicode-friendly
 
 <!-- @TODO
-`restricted` _does_ allow non-ASCII identifiers, as per [Rust RFC
+[`restricted`] _does_ allow (probably most) non-ASCII identifiers, as per [Rust RFC
 2457](https://rust-lang.github.io/rfcs/2457-non-ascii-idents.html). You can have non-ASCII characters in either/both
 
 - `path` right of `@` (optional; like `$crate` or `$crate::module::submodule` if used from a consumer/3rd party macro),
@@ -142,6 +155,7 @@ NOT compatible with [dtolnay/watt](https://github.com/dtolnay/watt) (because of 
 `build.rs`).
 
 <!-- references: -->
+[`restricted`]: https://crates.io/crates/restricted
 [`Span::call_site()`]:
     https://docs.rs/proc-macro2/latest/proc_macro2/struct.Span.html#method.call_site
 [`Span::mixed_site()`]:

@@ -51,16 +51,24 @@ fn f() {
         allowed_unused!();
     }
     {
-        def_const!(B2: bool = true);
+        macro_rules! def_and_use_const_B2 {
+            () => {
+                def_const!(B2: bool = true);
 
-        let _ = at_const!(B2);
-
-        {
-            def_const_direct!(U2: u8 = 1);
-            let _ = at_const!(U2);
-            //@TODO add token(s):
-            let _ = U2!(.);
+                let _ = at_const!(B2);
+            };
         }
+        def_and_use_const_B2!();
+        
+        macro_rules! def_and_use_const_direct_U2 {
+            () => {
+                def_const_direct!(U2: u8 = 1);
+                let _ = at_const!(U2);
+                //@TODO add token(s):
+                let _ = U2!(.);
+            };
+        }
+        def_and_use_const_direct_U2!();
     }
     {
         def_static!(B3: bool = true);
