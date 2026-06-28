@@ -1,56 +1,13 @@
 use restricted::prelude::*;
 
-macro_rules! defi_consti {
-    ( $short_name:ident:$ty:ty = $value:expr ) => {
-        #[doc = "Happy DI"]
-        const $short_name: $ty = $value;
-    };
-}
-defi_consti!(DI : bool = false);
-const DDI: bool = DI;
-
-def_const!(B: bool = true);
-def_const_direct!(U: u8 = 1);
-
-// @TODO have compile_fail test where a submodule from a different file fails
+// @TODO have compile_fail test where a submodule from a different file fails. (and update sub.rs)
 //
 //mod sub;
 
 // #[must_use]
 fn f() {
     #![allow(unused)]
-
-    //#[deprecated]
-    macro_rules! unused {
-        () => {
-            let unused = ();
-        };
-    }
-    macro_rules! allowed_unused {
-        () => {
-            #[allow(unused)]
-            let unused = ();
-        };
-    }
-
-    //#[cfg(all(debug_assertions, not(debug_assertions)))]
     {
-        {
-            #![deny(unused)]
-            let _ok_to_be_unused = ();
-
-            // fails to compile - OK:
-            //
-            //let x = ();
-
-            {
-                #![allow(unused)]
-                unused!();
-            }
-
-            // ok
-            allowed_unused!();
-        }
         {
             macro_rules! def_and_use_const_B2 {
             () => {
@@ -120,7 +77,8 @@ fn f() {
                         let st: St!(.);
                         st = < St!(.) >::new();
                     }
-                    // _NOT_ inside a function - `super` keyword doesn't work there!
+                    // WE _CANNOT_ ise `use_with!` inside a function - `super` keyword doesn't work
+                    // there!
                     //
                     /*use_with!{
                         St, CamelCase, st_access,
@@ -159,3 +117,5 @@ use_with! {
 
 fn take_st_alias(_: StAlias) {}
 fn take_st_alias2(_: StAlias2) {}
+
+// @TODO examples with explicit lower_case | UPPER_CASE | CamelCase name convention

@@ -8,12 +8,12 @@
 - accidental, or
 - intentional (well-intended or malicious)
 
-unguarded, or corrupt access to your macro's internals. It enables **your crates** to
-have private-like variables, functions and types, shared by **multiple** macros.
+unguarded, or corrupt access to your macro's internals. It enables **your crates** to have
+private-like variables, functions and types, shared by **multiple** macros.
 
 That is _unlike_ standard items and variables defined by macros, which, if hygienic, are visible
-only to the macro that defined them, _but_ not to any successive invocations of macros
-from the same crate.
+only to the macro that defined them, _but_ not to any successive invocations of macros from the same
+crate.
 
 [`restricted`] makes these variables, functions and types visible also to your **other** macros,
 invoked **after** the invocation that generates them.
@@ -29,15 +29,16 @@ statements](https://doc.rust-lang.org/reference/statements.html#declaration-stat
 ## Why?
 
 Macros generate code that blends, or is injected, into the invocator's source code. But
-- `macro_rules!` are hygienic about `let`/`let mut`. That is good for isolation. However, it doesn't
-  allow your other macro(s) to access the same variable(s) again.
+- `macro_rules!` are hygienic about `let`/`let mut` (and `'labels` and `$crate`). That is good for
+  isolation of local variables. However, it doesn't allow your other macro(s) to access the same
+  variables again.
 - `macro_rules!` are non-hygienic about any other items they define. Consumers of these macros can
   access to your macro's internals!
-- proc macros
-  - can apply [`Span::mixed_site()`] to act just like `macro_rules!`
-  - can generate other items (and hence any items) as hygienic with [`Span::call_site()`]
-  - can generate any items as non-hygienic with [`Span::def_site()`], but on `nightly` Rust
-    toolchain only.
+- proc macros can
+  - apply [`Span::mixed_site()`] to act just like `macro_rules!`
+  - generate other items (and hence any items) as hygienic with [`Span::call_site()`]
+  - generate any items as non-hygienic with [`Span::def_site()`], but on `nightly` Rust toolchain
+    only.
 
 ## How?
 
@@ -45,7 +46,7 @@ Macros generate code that blends, or is injected, into the invocator's source co
 
 - random-based names for your macro's items and variables, and
 - accessor macros that can be invoked only from your macro(s) and not by the consumer code (by
-  validating the [`Span`]).
+  validating the required [`Span`]).
 
 [`restricted`] provides macros for
 
