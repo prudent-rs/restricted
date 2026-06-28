@@ -102,7 +102,7 @@ fn f() {
                 fn _use_st() {
 
                     def_use_direct! {
-                        St, CamelCase,
+                        St, CamelCase;
                         pub struct St {}
                         impl St {
                             pub fn new() -> Self {
@@ -114,7 +114,7 @@ fn f() {
                     //fn _use_st() {
                     {
                         let st: at_use!(St, CamelCase);
-                        st = < at_use!(St, CamelCase) >::new();
+                        st = < at_use!(St) >::new();
                     }
                     {
                         let st: St!(.);
@@ -139,9 +139,9 @@ fn f() {
 }
 
 def_use_direct! {
-    St, CamelCase,
-    pub struct St {}
-    impl St {
+    HappyStruct;
+    pub struct HappyStruct {}
+    impl HappyStruct {
         pub fn new() -> Self {
             Self {}
         }
@@ -149,12 +149,12 @@ def_use_direct! {
 }
 
 use_with! {
-    St, CamelCase,
+    HappyStruct;
     // any identifier unique in the scope where use_with! is invoked
     st_access,
 
-    pub type StAlias = St;
-    pub type StAlias2 = St;
+    pub type StAlias = HappyStruct;
+    pub type StAlias2 = HappyStruct;
 }
 
 fn take_st_alias(_: StAlias) {}
