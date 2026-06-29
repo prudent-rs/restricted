@@ -10,20 +10,19 @@ fn f() {
     {
         {
             macro_rules! def_and_use_const_B2 {
-            () => {
-                def_const!(B2: bool = true);
+                () => {
+                    def_const!(B2: bool = true);
 
-                let _ = at_const!(B2);
-            };
-        }
+                    let _ = at_const!(B2);
+                };
+            }
             def_and_use_const_B2!();
 
             macro_rules! def_and_use_const_direct_U2 {
             () => {
                 def_const_direct!(U2: u8 = 1);
                 let _ = at_const!(U2);
-                //@TODO add token(s):
-                let _ = U2!(.);
+                let _ = U2!(.); //"direct" access
             };
         }
             def_and_use_const_direct_U2!();
@@ -36,8 +35,7 @@ fn f() {
             {
                 def_static_direct!(U3: u8 = 1);
                 let _ = at_static!(U3);
-                //@TODO add token(s):
-                let _ = U3!(.);
+                let _ = U3!(.); //"direct" access
             }
         }
     }
@@ -60,15 +58,18 @@ fn f() {
 
                     def_use_direct! {
                         St, CamelCase;
-                        pub struct St {}
+                        pub struct St {
+                            pub field: (),
+                        }
                         impl St {
                             pub fn new() -> Self {
-                                Self {}
+                                Self {
+                                    field: ()
+                                }
                             }
                         }
                     }
 
-                    //fn _use_st() {
                     {
                         let st: at_use!(St, CamelCase);
                         st = < at_use!(St) >::new();
@@ -77,11 +78,20 @@ fn f() {
                         let st: St!(.);
                         st = < St!(.) >::new();
                     }
-                    // WE _CANNOT_ ise `use_with!` inside a function - `super` keyword doesn't work
-                    // there!
+
+                    // Following instantiation is not possible - we need use_with!{...}
+                    /*{
+                        let st = St!(.) {
+                            field: ()
+                        };
+                    }*/
+
+                    // WE _CANNOT_ invoke `use_with!` inside a function - `super` keyword doesn't
+                    // work there!
                     //
                     /*use_with!{
-                        St, CamelCase, st_access,
+                        St;
+                        st_access, // = module name
                         pub type StAlias = St;
                         pub type StAlias2 = St;
                     }
@@ -92,11 +102,9 @@ fn f() {
         }
         def_use_and_consume!();
     }
-    /* */
-    //bufo_bufo_private_ident_here_dimvxevsdmqmbnuhyptltyqdlnafhdbg= 0;
 }
 
-def_use_direct! {
+def_use! {
     HappyStruct;
     pub struct HappyStruct {}
     impl HappyStruct {
@@ -109,13 +117,22 @@ def_use_direct! {
 use_with! {
     HappyStruct;
     // any identifier unique in the scope where use_with! is invoked
-    st_access,
+    st_access, // = module name
 
     pub type StAlias = HappyStruct;
     pub type StAlias2 = HappyStruct;
 }
 
-fn take_st_alias(_: StAlias) {}
-fn take_st_alias2(_: StAlias2) {}
+fn _take_st_alias(_: StAlias) {}
+fn _take_st_alias2(_: StAlias2) {}
 
 // @TODO examples with explicit lower_case | UPPER_CASE | CamelCase name convention
+
+def_use_direct! {
+    PinRestricted;
+
+    #[repr(transparent)] // plu: #[rustc_pub_transparent] etc.
+    pub struct PinRestricted<Ptr> {
+        pub pointer: Ptr
+    }
+}
