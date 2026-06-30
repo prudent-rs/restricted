@@ -1,17 +1,25 @@
-def_use_direct! {
-    PinRestricted;
+use restricted::prelude::*;
 
-    #[repr(transparent)] // plus: #[rustc_pub_transparent] etc.
-    pub struct PinRestricted<Ptr> {
-        pub pointer: Ptr
-    }
-}
+#[macro_export]
+macro_rules! create_pin_from_pointer {
+    ($pointer:expr) => {
+        {
+            def_use_direct! {
+                PinRestricted;
 
-use_with! {
-    PinRestricted;
-    pin_access,
+                #[repr(transparent)] // plus: #[rustc_pub_transparent] etc.
+                pub struct PinRestricted<Ptr> {
+                    pub pointer: Ptr
+                }
+            }
+            /*use_with! {
+                PinRestricted;
+                pin_access,
 
-    PinRestricted {
-
+                PinRestricted {
+                    pointer: $pointer
+                }
+            }*/
+        }
     }
 }

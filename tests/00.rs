@@ -129,3 +129,8 @@ fn _take_st_alias(_: StAlias) {}
 fn _take_st_alias2(_: StAlias2) {}
 
 // @TODO examples with explicit lower_case | UPPER_CASE | CamelCase name convention
+
+fn create_pin() {
+    //use pin::create_pin_from_pointer;
+    let _ = create_pin_from_pointer!(true);
+}
