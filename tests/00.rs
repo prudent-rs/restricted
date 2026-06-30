@@ -4,6 +4,8 @@ use restricted::prelude::*;
 //
 //mod sub;
 
+mod pin;
+
 // #[must_use]
 fn f() {
     #![allow(unused)]
@@ -127,12 +129,3 @@ fn _take_st_alias(_: StAlias) {}
 fn _take_st_alias2(_: StAlias2) {}
 
 // @TODO examples with explicit lower_case | UPPER_CASE | CamelCase name convention
-
-def_use_direct! {
-    PinRestricted;
-
-    #[repr(transparent)] // plu: #[rustc_pub_transparent] etc.
-    pub struct PinRestricted<Ptr> {
-        pub pointer: Ptr
-    }
-}
