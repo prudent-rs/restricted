@@ -1,3 +1,5 @@
+// https://github.com/rust-lang/rust/issues/35121 otherwise use crate never-say-never
+#[feature(never_type)]
 use restricted::prelude::*;
 
 // @TODO have compile_fail test where a submodule from a different file fails. (and update sub.rs)
@@ -21,12 +23,12 @@ fn f() {
             def_and_use_const_B2!();
 
             macro_rules! def_and_use_const_direct_U2 {
-            () => {
-                def_const_direct!(U2: u8 = 1);
-                let _ = at_const!(U2);
-                let _ = U2!(.); //"direct" access
-            };
-        }
+                () => {
+                    def_const_direct!(U2: u8 = 1);
+                    let _ = at_const!(U2);
+                    let _ = U2!(.); //"direct" access
+                };
+            }
             def_and_use_const_direct_U2!();
         }
         {
@@ -130,7 +132,30 @@ fn _take_st_alias2(_: StAlias2) {}
 
 // @TODO examples with explicit lower_case | UPPER_CASE | CamelCase name convention
 
+//----
 fn create_pin() {
     //use pin::create_pin_from_pointer;
     let _ = create_pin_from_pointer!(true);
 }
+
+struct StructToInferWhenCallingItsMethod {}
+impl StructToInferWhenCallingItsMethod {
+    const fn method(&self) {}
+    const fn safe() {}
+}
+const _: () = {
+    let s = StructToInferWhenCallingItsMethod {};
+    //<_>::method(s);
+};
+//----
+
+trait Methody {}
+
+fn apply() {
+    // Problem: Every macro invocation returns a different function - so they _may_ not be able
+    // to be compared.
+    //
+    //let _f = safy!( unsafe-fn-here);
+}
+
+mod safy;
