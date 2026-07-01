@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![no_std]
 
 #[cfg(rust_analyzer)]
 use no_link as _;
@@ -44,3 +45,123 @@ const _: () = {
         panic!("prudent-rs/restricted has its function is_exact_version() out of date.");
     }
 };
+//-----------
+
+/// @TODO restricted constructor
+pub struct Local;
+
+#[repr(transparent)]
+struct Unsafe1<'l, R, A1> {
+    l: core::marker::PhantomData<&'l ()>,
+    p: fn(A1) -> R,
+}
+impl<'l, R, A1> Unsafe1<'l, R, A1> {
+    pub fn unsafe_call(_: A1) -> R {
+        todo!()
+    }
+}
+
+// @TODO async unsafe
+//
+pub trait UnsafeFnPtr: Copy {
+    type Safe;
+
+    type SafeRef<'a>
+    where
+        Self: 'a;
+
+    //fn unsafey<'a>(self, _: &'a Local) -> Self::SafeRef<'a>;
+    fn unsafey<'s: 'l, 'l>(&'s self, _: &'l Local) -> Self::SafeRef<'l>;
+}
+macro_rules! unsafe_fn_ptr_impl {
+    ( $result:ident; $( $arg:ident ),* ) => {
+
+        impl< $result $(, $arg )* > UnsafeFnPtr
+        for unsafe fn( $( $arg ),* ) -> $result {
+
+            type Safe = fn( $( $arg ),* ) -> $result;
+
+            type SafeRef<'a> = &'a dyn Fn ( $( $arg ),* ) -> $result where Self: 'a;
+
+            //fn unsafey<'a>(self, _: &'a Local) -> Self::SafeRef<'a> {
+            fn unsafey<'s: 'l, 'l>(&'s self, _: &'l Local) -> Self::SafeRef<'l> {
+                let ptr: Self::Safe = unsafe { core::mem::transmute(self) };
+                //unsafe{ core::mem::transmute(ptr) }
+                //
+                // @TODO:
+                //
+                // |a1: A1, a2: A3....| f(...)
+                todo!()
+            }
+        }
+    }
+}
+unsafe_fn_ptr_impl!( R; );
+unsafe_fn_ptr_impl!( R; A1 );
+unsafe_fn_ptr_impl!( R; A1, A2 );
+unsafe_fn_ptr_impl!( R; A1, A2, A3 );
+unsafe_fn_ptr_impl!( R; A1, A2, A3, A4 );
+unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5 );
+unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6 );
+unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7 );
+unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7, A8 );
+unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7, A8, A9 );
+unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7, A8, A9, A10 );
+unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11 );
+unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 );
+unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 ,A13 );
+
+fn ref_to_fn_ptr() {
+    fn simple() {}
+    let fn_ptr = simple;
+    let fn_ptr_ref = &fn_ptr;
+    fn_ptr_ref();
+}
+
+//-------
+//-------
+fn simple_fn() {}
+
+//type SSS = struct SSS_ {};
+fn lifetimed<'a>(arg: &'a ()) -> impl Fn() + 'a {
+    simple_fn
+}
+
+pub fn try_return_lifetimed_to_escape_scope<'a>(arg: &'a ()) -> impl Fn() {
+    lifetimed(arg)
+}
+//-------
+
+trait Lifetimed<'a> {}
+
+impl<'a, T> Lifetimed<'a> for T
+where
+    T: Fn(),
+    T: 'a,
+{
+}
+
+fn lifetimed2<'a>(arg: &'a ()) -> impl Fn() + Lifetimed<'a> {
+    simple_fn
+}
+
+pub fn try_return_lifetimed_to_escape_scope2<'a>(arg: &'a ()) -> impl Fn() + Lifetimed<'a> {
+    lifetimed2(arg)
+}
+
+pub fn fn_ptr_to_impl<'a, T: Lifetimed<'a>>(_: T, p: fn()) -> impl Fn() + 'a {
+    p
+}
+
+/*impl<'l> core::ops::Deref for DereFn<'l> {
+    /*pub fn unsafy(&self) -> impl Fn() {*/
+    type Target = ;
+}*/
+//-------
+//-------
+
+//-------
+//-------
+//-------
+//-------
+//-------

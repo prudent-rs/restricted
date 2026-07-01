@@ -20,7 +20,6 @@ impl<R> UnsafeFn for unsafe fn() -> R {
 impl<A1, R> UnsafeFn for unsafe fn(A1) -> R {
     type Safer = fn(A1) -> R;
 }
-// @TODO async unsafe
 
 def_use! {
     LocalOnly;
@@ -58,19 +57,6 @@ macro_rules! safy {
     }
 }
 //------------
-
-pub trait FnPtr: Copy {
-    type Safe;
-    fn safe(self) -> Self::Safe;
-}
-impl<R> FnPtr for unsafe fn() -> R {
-    type Safe = fn() -> R;
-    fn safe(self) -> Self::Safe {
-        //unsafe { self as const* _ as Self::Safe}
-        //unsafe { self as Self::Safe}
-        unsafe { core::mem::transmute(self) }
-    }
-}
 
 const _: () = {
     let f = || 0usize;

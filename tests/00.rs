@@ -1,5 +1,6 @@
 // https://github.com/rust-lang/rust/issues/35121 otherwise use crate never-say-never
-#[feature(never_type)]
+//
+//#[feature(never_type)]
 use restricted::prelude::*;
 
 // @TODO have compile_fail test where a submodule from a different file fails. (and update sub.rs)
@@ -157,5 +158,26 @@ fn apply() {
     //
     //let _f = safy!( unsafe-fn-here);
 }
+//-----
 
 mod safy;
+
+//trait Lifetime<'a> {}
+
+fn fn_ptr_to_trait<'a>(p: fn()) -> impl Fn() {
+    p
+}
+
+#[test]
+fn compare_fn_ptr_and_its_reference() {
+    let p = compare_fn_ptr_and_its_reference;
+    let r = fn_ptr_to_trait(p);
+    let rr = &r;
+
+    //let p = p as usize;
+    //
+    //let r =
+    //let r = &compare_fn_ptr_and_its_reference as *const _ as usize;
+
+    assert!(&r as *const _ as usize == &rr as *const _ as usize);
+}
