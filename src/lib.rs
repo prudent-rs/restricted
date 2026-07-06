@@ -47,45 +47,66 @@ const _: () = {
 };
 //-----------
 
+pub mod fn_item;
+
+/// Parts are based on https://users.rust-lang.org/t/implementing-traits-on-function-pointers/57423/2 > https://play.rust-lang.org/?version=stable&mode=debug&edition=2018&gist=2d064fe8d7f579d0e59df9967861ee7a
+
+// @TODO move to scopy:: and have scopy::local! macro
+//
 /// @TODO restricted constructor
 pub struct Local;
 
 #[repr(transparent)]
-struct Unsafe1<'l, R, A1> {
+struct UnsafeXX<'l, R, A1> {
     l: core::marker::PhantomData<&'l ()>,
     p: fn(A1) -> R,
 }
-impl<'l, R, A1> Unsafe1<'l, R, A1> {
-    pub fn unsafe_call(_: A1) -> R {
-        todo!()
+impl<'l, R, A1> UnsafeXX<'l, R, A1> {
+    pub fn unsafex(&self, a1: A1) -> R {
+        let p = self.p;
+        p(a1)
     }
 }
 
+/// No `const` support for now. Please state your use case.
+//
 // @TODO async unsafe
 //
-pub trait UnsafeFnPtr: Copy {
-    type Safe;
+pub trait UnsafeFnPtr {
+    type AsSafe;
 
-    type SafeRef<'a>
+    type AsSafeWrap<'l>
     where
-        Self: 'a;
+        Self: 'l;
 
-    //fn unsafey<'a>(self, _: &'a Local) -> Self::SafeRef<'a>;
-    fn unsafey<'s: 'l, 'l>(&'s self, _: &'l Local) -> Self::SafeRef<'l>;
+    //fn safy<'s: 'l, 'l>(&'s self, _: &'l Local) -> Self::AsSafeWrap<'l>;
+    fn safy<'l>(self, _: &'l Local) -> Self::AsSafeWrap<'l>;
 }
 macro_rules! unsafe_fn_ptr_impl {
-    ( $result:ident; $( $arg:ident ),* ) => {
+    ( $result:ident, $wrapper_str:ident; $( $arg_name:ident : $arg_ty:ident ),* ) => {
 
-        impl< $result $(, $arg )* > UnsafeFnPtr
-        for unsafe fn( $( $arg ),* ) -> $result {
+    #[repr(transparent)]
+    struct $wrapper_str<'l, R, $( $arg_ty ),* > {
+        l: ::core::marker::PhantomData<&'l ()>,
+        p: fn( $( $arg_ty ),* ) -> R,
+    }
+    impl<'l, R,$( $arg_ty ),* > $wrapper_str<'l, R, $( $arg_ty ),* > {
+        pub fn unsafex(&self, $( $arg_name:$arg_ty ),* ) -> R {
+            let p = self.p;
+            p( $( $arg_name ),* )
+        }
+    }
 
-            type Safe = fn( $( $arg ),* ) -> $result;
+    impl< $result $(, $arg_ty )* > UnsafeFnPtr
+        for unsafe fn( $( $arg_ty ),* ) -> $result {
 
-            type SafeRef<'a> = &'a dyn Fn ( $( $arg ),* ) -> $result where Self: 'a;
+            type AsSafe = fn( $( $arg_ty ),* ) -> $result;
 
-            //fn unsafey<'a>(self, _: &'a Local) -> Self::SafeRef<'a> {
-            fn unsafey<'s: 'l, 'l>(&'s self, _: &'l Local) -> Self::SafeRef<'l> {
-                let ptr: Self::Safe = unsafe { core::mem::transmute(self) };
+            type AsSafeWrap<'l> = &'l dyn Fn ( $( $arg_ty ),* ) -> $result where Self: 'l;
+
+            //fn safy<'s: 'l, 'l>(&'s self, _: &'l Local) -> Self::AsSafeWrap<'l> {
+            fn safy<'l>(self, _: &'l Local) -> Self::AsSafeWrap<'l> {
+                let _ptr: Self::AsSafe = unsafe { core::mem::transmute(self) };
                 //unsafe{ core::mem::transmute(ptr) }
                 //
                 // @TODO:
@@ -96,20 +117,19 @@ macro_rules! unsafe_fn_ptr_impl {
         }
     }
 }
-unsafe_fn_ptr_impl!( R; );
-unsafe_fn_ptr_impl!( R; A1 );
-unsafe_fn_ptr_impl!( R; A1, A2 );
-unsafe_fn_ptr_impl!( R; A1, A2, A3 );
-unsafe_fn_ptr_impl!( R; A1, A2, A3, A4 );
-unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5 );
-unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6 );
-unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7 );
-unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7, A8 );
-unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7, A8, A9 );
-unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7, A8, A9, A10 );
-unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11 );
-unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 );
-unsafe_fn_ptr_impl!( R; A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12 ,A13 );
+unsafe_fn_ptr_impl!( R, UnsafeFnWrapper00; );
+unsafe_fn_ptr_impl!( R, UnsafeFnWrapper01; a1:A1 );
+unsafe_fn_ptr_impl!( R, UnsafeFnWrapper02; a1:A1, a2:A2 );
+unsafe_fn_ptr_impl!( R, UnsafeFnWrapper03; a1:A1, a2:A2, a3:A3 );
+//unsafe_fn_ptr_impl!( R; a1:A1, a2:A2, a3:A3, a4:A4 );
+//unsafe_fn_ptr_impl!( R; a1:A1, a2:A2, a3:A3, a4:A4, a5:A5 );
+//unsafe_fn_ptr_impl!( R; a1:A1, a2:A2, a3:A3, a4:A4, a5:A5, a6:A6 );
+//unsafe_fn_ptr_impl!( R; a1:A1, a2:A2, a3:A3, a4:A4, a5:A5, a6:A6, a7:A7 );
+
+unsafe fn uns_one_arg(_: u8) {}
+pub fn invoke_uns_one_arg() {
+    //(&uns_one_arg).safy(&Local).unsafex(1);
+}
 
 fn ref_to_fn_ptr() {
     fn simple() {}
@@ -123,7 +143,7 @@ fn ref_to_fn_ptr() {
 fn simple_fn() {}
 
 //type SSS = struct SSS_ {};
-fn lifetimed<'a>(arg: &'a ()) -> impl Fn() + 'a {
+fn lifetimed<'a>(_arg: &'a ()) -> impl Fn() + 'a {
     simple_fn
 }
 
@@ -141,7 +161,7 @@ where
 {
 }
 
-fn lifetimed2<'a>(arg: &'a ()) -> impl Fn() + Lifetimed<'a> {
+fn lifetimed2<'a>(_arg: &'a ()) -> impl Fn() + Lifetimed<'a> {
     simple_fn
 }
 
