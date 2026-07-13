@@ -108,7 +108,7 @@ where
     }
 }
 
-macro_rules! implementation_for {
+/*macro_rules! implementation_for {
     ($($Args:ident),*) => {
         impl<$($Args,)* O> FnOutputType<($($Args,)*)> for O {
             type F = fn($($Args,)*) -> O;
@@ -156,13 +156,13 @@ implementation_for!(A, B, C, D, E, G, H, I, J, K, L);
 implementation_for!(A, B, C, D, E, G, H, I, J, K, L, M);
 implementation_for!(A, B, C, D, E, G, H, I, J, K, L, M, N);
 implementation_for!(A, B, C, D, E, G, H, I, J, K, L, M, N, P);
-implementation_for!(A, B, C, D, E, G, H, I, J, K, L, M, N, P, Q);
+implementation_for!(A, B, C, D, E, G, H, I, J, K, L, M, N, P, Q);*/
 
 fn foo() {
     //panic!("hi");
 }
 
-pub fn main() {
+pub fn _main() {
     let x = foo.as_fn();
     x();
     // non-capturing closure
