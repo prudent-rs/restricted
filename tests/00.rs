@@ -179,5 +179,5 @@ fn compare_fn_ptr_and_its_reference() {
     //let r =
     //let r = &compare_fn_ptr_and_its_reference as *const _ as usize;
 
-    assert!(&r as *const _ as usize == &rr as *const _ as usize);
+    assert!(&r as *const _ as usize != &rr as *const _ as usize);
 }

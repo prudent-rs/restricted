@@ -1,6 +1,10 @@
 #![doc = include_str!("../README.md")]
 #![no_std]
 
+//#![allow(incomplete_features)]
+//#![feature(min_generic_const_args, generic_const_args)]
+//#![feature(min_generic_const_args)]
+
 #[cfg(rust_analyzer)]
 use no_link as _;
 #[cfg(rust_analyzer)]

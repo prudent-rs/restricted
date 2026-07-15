@@ -28,12 +28,18 @@ pub trait ZeroSized {}
 
 //impl<T: Sized> ZeroSized for T where [(); mem::size_of::<T>()]:, {}
 
-// @TODO sealed trait, even though it can'e be implemented elsewhere even if _not_ sealed
-pub trait AssertZeroSized: Sized {
+type TwiceUsizeMaxOf<T> = [[T; const { usize::MAX }]; 2];
+
+// @TODO sealed trait, even though it can't be implemented elsewhere (regardless of whether sealed or not)
+pub trait AssertZeroSized: Sized
+where
+    TwiceUsizeMaxOf<Self>:,
+{
     const ASSERT_ZERO_SIZED: usize; /*= {
-        assert!(mem::size_of::<Self>() == 0);
-        0
+    assert!(mem::size_of::<Self>() == 0);
+    0
     };*/
+    type TwiceUsizeMaxOfSelf;
 }
 
 //#[track_caller]
@@ -43,18 +49,44 @@ const fn assert_zero_size<T>() -> usize {
     }
     mem::size_of::<T>()
 }
-impl<T: Sized> AssertZeroSized for T {
+impl<T: Sized> AssertZeroSized for T
+where
+    TwiceUsizeMaxOf<Self>:,
+{
     /*const ASSERT_ZERO_SIZED: usize = {
         assert!(mem::size_of::<Self>() == 0);
         0
     };*/
     //const ASSERT_ZERO_SIZED: usize = assert_zero_size::<Self>();
-    const ASSERT_ZERO_SIZED: usize = assert_zero_size::<T>();
+    const ASSERT_ZERO_SIZED: usize = const {
+        assert_zero_size::<Self /*Self or T */>()
+    };
+    type TwiceUsizeMaxOfSelf = TwiceUsizeMaxOf<Self>;
 }
+
+// ------
+pub trait SelfZSTCarrierTrait<S: Sized>: Sized {
+    type Me;
+    //type Dispatcher;
+
+    //type EnsureZST;
+}
+//pub struct SelfZSTEnsurer<S>(TwiceUsizeMaxOf<S>);
+pub type SelfZSTEnsurer<S: Sized> = TwiceUsizeMaxOf<S>;
+impl<S: Sized> SelfZSTCarrierTrait<S> for SelfZSTEnsurer<S> {
+    type Me = S;
+    //type Dispatcher = [(); <S as AssertZeroSized>::ASSERT_ZERO_SIZED];
+
+    //type EnsureZST = TwiceUsizeMaxOf<S>;
+}
+pub type SelfZST<S> = <SelfZSTEnsurer<S> as SelfZSTCarrierTrait<S>>::Me;
+// ------
+
+//-------
 
 impl<O> FnOutputType<()> for O {
     type F = fn() -> O;
-}
+} //@TODO macros?
 
 //struct AcceptOnlyTrue<const B: bool> {}
 
@@ -73,17 +105,19 @@ pub trait ZeroSizedFunction<Args> {
 
     //
     //fn assert_zero_sized() -> [bool; Self::ASSERT_IS_ZERO_SIZED];
-    
+
     //fn take_bools(b: [bool; Self::ASSERT_IS_ZERO_SIZED]);
 
-    fn as_fn(self) -> FnType<Args, Self::Output>;
+    fn as_fn(self) -> &'static SelfZST<FnType<Args, Self::Output>>;
 }
 
 impl<O, F: Fn() -> O> ZeroSizedFunction<()> for F
 where
-    F: Copy
-    //F: Copy, [(); <F as AssertZeroSized>::ASSERT_ZERO_SIZED]:
-    // actually, only *really* implemented by zero-sized function types
+    F: Copy,
+    TwiceUsizeMaxOf<F>:, //F: AssertZeroSized<ASSERT_ZERO_SIZED = 0>
+
+                         //F: Copy, [(); <F as AssertZeroSized>::ASSERT_ZERO_SIZED]:
+                         // actually, only *really* implemented by zero-sized function types
 {
     type Output = O;
     const ASSERT_IS_ZERO_SIZED: usize = F::ASSERT_ZERO_SIZED;
@@ -91,20 +125,27 @@ where
     //
     //type TypeKnownIfSelfZeroSized = StructWithUsize<{ Self::ASSERT_IS_ZERO_SIZED }>;
 
-    fn as_fn(self) -> fn() -> O {
+    fn as_fn(self) -> &'static fn() -> O {
         // assert zero-sizedness
         //
         // Requiring one of the following two - the `const` in the trait and types are *not* enough
         //
         //let _ = F::ASSERT_ZERO_SIZED;
-        const {
-            F::ASSERT_ZERO_SIZED
-        };
+        const { F::ASSERT_ZERO_SIZED };
 
-        || {
+        /*if false {
+            & (|| {
+                let f: F = unsafe { MaybeUninit::uninit().assume_init() };
+                f()
+            })
+        } else {*/
             let f: F = unsafe { MaybeUninit::uninit().assume_init() };
-            f()
-        }
+            unsafe { core::mem::transmute(&f) }
+        /* } */
+        /*|| {
+                let f: F = unsafe { MaybeUninit::uninit().assume_init() };
+                f()
+        }*/
     }
 }
 
@@ -181,8 +222,10 @@ pub fn _main() {
 
     let v = 42;
     // not a nice error message, but the following (if uncommented) doesn’t compile
-    let a = (move || panic!("{:?}", v)).as_fn();
-    core::hint::black_box(a);
+    //
+    //let a = (move || panic!("{:?}", v)).as_fn();
+    //
+    //core::hint::black_box(a);
 }
 //--------
 
@@ -195,7 +238,7 @@ trait TrWithConstAndType {
 
 //fn take_tr_with_type_usize(_: impl TrWithConstAndType<T = ()> ) {}
 //
-fn take_tr_with_type_usize(_: impl TrWithConstAndType<T: Sized+'static> ) {}
+fn take_tr_with_type_usize(_: impl TrWithConstAndType<T: Sized + 'static>) {}
 
 pub trait ErrorConstCarrier {
     const ERROR: ();
@@ -209,4 +252,3 @@ pub const _: () = <() as ErrorConstCarrier>::ERROR;*/
 pub struct Deprecated {}
 
 pub use Deprecated as _;
-
